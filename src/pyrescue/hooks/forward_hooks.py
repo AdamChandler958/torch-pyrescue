@@ -1,12 +1,16 @@
+import logging
+
 import torch
 
-from src.pyrescue.logger.logger import logger
 
+class NaNDectectorHook:
+    def __init__(self, logger: logging.Logger):
+        self.logger = logger
 
-def nan_detector_hook(
-    module: torch.nn.Module, input: torch.Tensor, output: torch.Tensor
-):
-    if torch.isnan(output).any():
-        logger.error(
-            "Nan value detected in the output of %s", module.__class__.__name__
-        )
+    def __call__(
+        self, module: torch.nn.Module, input: torch.Tensor, output: torch.Tensor
+    ):
+        if torch.isnan(output).any():
+            self.logger.error(
+                "Nan value detected in the output of %s", module.__class__.__name__
+            )
