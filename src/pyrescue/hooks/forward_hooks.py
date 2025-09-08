@@ -1,6 +1,6 @@
 import torch
 
-from src.pyrescue.logger import logger
+from src.pyrescue.logger.logger import logger
 
 
 def nan_detector_hook(
