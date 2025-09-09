@@ -18,10 +18,9 @@ class NaNDectectorHook:
             self.logger.error(
                 "Nan value detected in the output of %s", module.__class__.__name__
             )
-            self.detected = True
 
             self.logger.info("Reverting save state")
             self.state_manager.load_state()
             self.state_manager.apply_lr_decrease()
 
-            self.detected = False
+            raise ValueError("NaN value detected.")

@@ -30,7 +30,7 @@ class StateManager:
                 self.model.state_dict(),
                 f"{self.checkpoint_directory}/{self.model.__class__.__name__}-checkpoint-{uuid.uuid4().hex[:8]}.pth",
             )
-            self.current_save_state = self.model.state_dict()
+            self.current_save_state["model_dict"] = self.model.state_dict()
             self.logger.info(
                 f"Successfully saved {self.model.__class__.__name__} model weights"
             )
@@ -43,7 +43,7 @@ class StateManager:
     def load_state(self):
         self.logger.info(f"Loading weight dict for {self.model.__class__.__name__}")
         try:
-            self.model.state_dict().update(self.current_save_state["model_dict"])
+            self.model.load_state_dict(self.current_save_state["model_dict"])
             self.logger.info(
                 f"Successfully updated weights for {self.model.__class__.__name__}"
             )
@@ -51,6 +51,7 @@ class StateManager:
             self.logger.error(
                 f"Failed to load model weights for {self.model.__class__.__name__} with error: {e}"
             )
+            raise
 
     def apply_lr_decrease(self, reduction_proportion: float = 0.5):
         self.logger.info(

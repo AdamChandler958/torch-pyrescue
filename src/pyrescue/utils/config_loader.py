@@ -12,6 +12,8 @@ def load_config(user_config_path: str | None):
 
         _merge_dicts(config, user_config)
 
+    return config
+
 
 def _merge_dicts(target: dict, source: dict):
     for key, value in source.items():

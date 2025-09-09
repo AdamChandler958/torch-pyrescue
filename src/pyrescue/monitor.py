@@ -19,7 +19,10 @@ class TrainingMonitor:
         self.logger = setup_logging(self.config["logging"])
 
         self.state_manager = StateManager(
-            model=self.model, logger=self.logger, config=self.config["state_manager"]
+            model=self.model,
+            optimiser=self.optimiser,
+            logger=self.logger,
+            config=self.config["state_manager"],
         )
 
         self.nan_detector_hook = NaNDectectorHook(
