@@ -7,8 +7,15 @@ import torch.nn as nn
 
 
 class StateManager:
-    def __init__(self, model: nn.Module, logger: logging.Logger, config: dict):
+    def __init__(
+        self,
+        model: nn.Module,
+        optimiser: torch.optim.Optimizer,
+        logger: logging.Logger,
+        config: dict,
+    ):
         self.model = model
+        self.optimiser = optimiser
         self.checkpoint_directory = config["checkpoint_directory"]
         self.logger = logger
         self.current_save_state = {"model_dict": None}
@@ -44,3 +51,13 @@ class StateManager:
             self.logger.error(
                 f"Failed to load model weights for {self.model.__class__.__name__} with error: {e}"
             )
+
+    def apply_lr_decrease(self, reduction_proportion: float = 0.5):
+        self.logger.info(
+            f"Reducing learning rate by a factor of {reduction_proportion}"
+        )
+        current_lr = self.optimiser.param_groups[0]["lr"]
+        self.optimiser.param_groups[0]["lr"] = current_lr * reduction_proportion
+        self.logger.info(
+            f"Successfully reduced learning rate. Resuming training with learning rate: {self.optimiser.param_groups[0]['lr']}"
+        )
