@@ -7,20 +7,33 @@ from src.pyrescue.utils.config_loader import load_config
 
 
 class TrainingMonitor:
-    def __init__(self, config_path: str = None):
+    def __init__(
+        self,
+        model: torch.nn.Module,
+        optimiser: torch.optim.Optimizer,
+        config_path: str = None,
+    ):
+        self.model = model
+        self.optimiser = optimiser
         self.config = load_config(config_path)
         self.logger = setup_logging(self.config["logging"])
 
-        self.nan_detector_hook = NaNDectectorHook(logger=self.logger)
         self.state_manager = StateManager(
-            logger=self.logger, config=self.config["state_manager"]
+            model=self.model, logger=self.logger, config=self.config["state_manager"]
         )
 
-    def _register_model_forward_hooks(self, model: torch.nn.Module):
-        # This will later be replaced with a more adaptive function to register both forward and backward hooks.
-        model.register_forward_hook(self.nan_detector_hook)
+        self.nan_detector_hook = NaNDectectorHook(
+            logger=self.logger, state_manager=self.state_manager
+        )
 
-    def start(self, model: torch.nn.Module, optimiser: torch.optim.Optimizer):
+    def _register_model_forward_hooks(self):
+        # This will later be replaced with a more adaptive function to register both forward and backward hooks.
+        self.model.register_forward_hook(self.nan_detector_hook)
+
+    def step(self):
+        self.state_manager.save_state()
+
+    def start(self):
         # TODO: Add logic to handle adding optimiser hooks
-        self._register_model_forward_hooks(model)
+        self._register_model_forward_hooks()
         self.logger.info("Monitoring started.")
