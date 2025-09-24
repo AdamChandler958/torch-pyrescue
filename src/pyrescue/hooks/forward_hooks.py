@@ -2,24 +2,21 @@ import logging
 
 import torch
 
-from src.pyrescue.state_manager import StateManager
+from src.pyrescue.hooks.hook import Hook
+
+logger = logging.getLogger(__name__)
 
 
-class NaNDectectorHook:
-    def __init__(self, logger: logging.Logger, state_manager: StateManager):
-        self.logger = logger
-        self.state_manager = state_manager
-        self.detected = False
+class NaNDectectorHook(Hook):
+    def __init__(self, name: str):
+        super().__init__(name, is_forward_hook=True)
 
-    def __call__(
-        self, module: torch.nn.Module, input: torch.Tensor, output: torch.Tensor
-    ):
+    def hook(self, module: torch.nn.Module, input: torch.Tensor, output: torch.Tensor):
         if torch.isnan(output).any():
-            self.logger.error(
+            logger.warning(
                 "Nan value detected in the output of %s", module.__class__.__name__
             )
 
-            self.state_manager.load_state()
-            self.state_manager.apply_lr_decrease()
-
-            raise ValueError("NaN value detected")
+            # Trigger the observer and then reset.
+            self.flag_status = True
+            self.flag_status = False
