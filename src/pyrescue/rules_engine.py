@@ -15,6 +15,7 @@ class RulesEngine:
     def update(self, flag_name: str, flag_value: bool):
         if flag_value:
             logger.info(f"Flag {flag_name} activated. Applying Rules...")
+            self.apply_rules(flag_name)
 
     def apply_rules(self, flag_name: str):
         rule_function = self.rules.get(flag_name, self.default_rule)

@@ -10,7 +10,7 @@ class VanishingGradientHook:
         self.logger = logger
         self.state_manager = state_manager
         self.gradient_norms = []
-        self.is_vanishing = False
+        self.flag = False
 
     def hook(self, module: torch.nn.Module, input_grads: tuple, ouput_grads: tuple):
         for grad in input_grads:
@@ -25,4 +25,4 @@ class VanishingGradientHook:
             avg_norm = sum(self.gradient_norms[-window_size:]) / window_size
             if avg_norm < threshold:
                 self.logger.warning("Vanishing gradients detected")
-                self.is_vanishing = True
+                self.flag = True
